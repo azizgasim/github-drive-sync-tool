@@ -1,0 +1,21 @@
+name: "Sync GitHub to Drive"
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install google-api-python-client google-auth requests
+      - env:
+          GITHUB_USER: ${{ secrets.SYNC_GITHUB_USER }}
+          GITHUB_TOKEN: ${{ secrets.SYNC_GITHUB_TOKEN }}
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: python scripts/sync_drive.py --direction to_drive
