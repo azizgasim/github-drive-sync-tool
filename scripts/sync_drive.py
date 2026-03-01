@@ -39,7 +39,11 @@ def all_repos():
     repos,page=[],1
     while True:
         r=requests.get(f"{GITHUB_API}/users/{GITHUB_USER}/repos",headers=gh_h(),params={"per_page":100,"page":page,"type":"owner"},timeout=30)
+        try:
         r.raise_for_status()
+    except Exception as e:
+        log.warning(f"Skip {path}: {e}")
+        continue
         b=r.json()
         if not b:break
         repos.extend(b);page+=1
@@ -54,9 +58,13 @@ def repo_tree(name):
     return[]
 
 def gh_file(repo,path):
-    r=requests.get(f"{GITHUB_API}/repos/{GITHUB_USER}/{repo}/contents/{path}",headers=gh_h(),timeout=30)
-    if r.status_code==404:return None
-    r.raise_for_status()
+    try:
+        r=requests.get(f"{GITHUB_API}/repos/{GITHUB_USER}/{repo}/contents/{path}",headers=gh_h(),timeout=30)
+        if r.status_code==404:return None
+        if r.status_code!=200:
+            log.warning(f"Skip {repo}/{path}: HTTP {r.status_code}");return None
+    except Exception as e:
+        log.warning(f"Skip {repo}/{path}: {e}");return None
     d=r.json()
     if d.get("encoding")=="base64":return base64.b64decode(d["content"])
     dl=d.get("download_url")
