@@ -16,6 +16,8 @@ jobs:
       - env:
           GITHUB_USER: ${{ secrets.SYNC_GITHUB_USER }}
           GITHUB_TOKEN: ${{ secrets.SYNC_GITHUB_TOKEN }}
-          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
         run: python scripts/sync_drive.py --direction to_drive

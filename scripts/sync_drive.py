@@ -2,7 +2,8 @@
 import os,io,json,hashlib,base64,logging,argparse,mimetypes,requests
 from pathlib import Path
 from datetime import datetime,timezone
-from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload,MediaIoBaseUpload
 
@@ -11,15 +12,25 @@ log=logging.getLogger(__name__)
 
 GITHUB_USER=os.environ["GITHUB_USER"]
 GITHUB_TOKEN=os.environ["GITHUB_TOKEN"]
-GDRIVE_CREDS_JSON=os.environ["GDRIVE_CREDENTIALS"]
 GDRIVE_ROOT_ID=os.environ["GDRIVE_FOLDER_ID"]
+CLIENT_ID=os.environ["GDRIVE_CLIENT_ID"]
+CLIENT_SECRET=os.environ["GDRIVE_CLIENT_SECRET"]
+REFRESH_TOKEN=os.environ["GDRIVE_REFRESH_TOKEN"]
 GITHUB_API="https://api.github.com"
 SCOPES=["https://www.googleapis.com/auth/drive"]
 IGNORE={".git",".DS_Store","__pycache__","node_modules"}
 
 def get_drive():
-    c=service_account.Credentials.from_service_account_info(json.loads(GDRIVE_CREDS_JSON),scopes=SCOPES)
-    return build("drive","v3",credentials=c,cache_discovery=False)
+    creds=Credentials(
+        token=None,
+        refresh_token=REFRESH_TOKEN,
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        token_uri="https://oauth2.googleapis.com/token",
+        scopes=SCOPES
+    )
+    creds.refresh(Request())
+    return build("drive","v3",credentials=creds,cache_discovery=False)
 
 def gh_h():
     return {"Authorization":f"Bearer {GITHUB_TOKEN}","Accept":"application/vnd.github+json"}
